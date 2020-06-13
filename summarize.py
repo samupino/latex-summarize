@@ -25,6 +25,15 @@ class LatexParser:
             return match.groups()[0]
         else:
             return None
+    
+    def check_start_appendix(self, line: str):
+        """If line is an appendix declaration return 'Appendix: NAME', else None."""
+        pattern = r"append(\[.*\])?\{(.+)\}"
+        match = re.search(pattern, line)
+        if (match):
+            return "Appendix: " + match.groups()[-1]
+        else:
+            return None
 
     def check_begin_env(self, line: str):
         """If line is an environment declaration of interest return env name, else None."""
@@ -94,7 +103,7 @@ def find_and_copy_envs(out_file, tex_path: str, p: LatexParser):
             # If we are not in one of the specified environments.
 
             found_environment = p.check_begin_env(line)
-            found_chapter = p.check_start_chapter(line)
+            found_chapter = p.check_start_chapter(line) or p.check_start_appendix(line)
             found_section = p.check_start_section(line)
 
             if (found_environment):
