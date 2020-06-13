@@ -1,4 +1,4 @@
-# Summary of text
+# Summary of equations
 
 The example LaTeX project in this example is readapted from
 https://www.overleaf.com/latex/templates/an-example-geophysics-report/jvmtcvsxwhmm.
@@ -11,7 +11,9 @@ One main modification to the original template has been made:
 From the main directory type the following command on a shell
 
 ```
-python summarize.py -o ./examples/equations/summarized/summary.tex ./examples/equations/geophysics_report/main.tex equation
+python3 summarize.py -o ./examples/equations/summarized/summary.tex ./examples/equations/geophysics_report/main.tex equation
 ```
 
 It will create the file `summary.tex` containing all the snippets from the `geophysics_report` that are inside a `equation` environment.
+
+![From full text to equations summary](example_equations.png)
