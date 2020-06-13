@@ -12,7 +12,7 @@ Two main modifications to the original template have been made:
 From the main directory type the following command on a shell
 
 ```
-python summarize.py -d ./examples/text/geophysics_report/sections -o ./examples/text/summarized/summary.tex summaryenv
+python summarize.py -o ./examples/text/summarized/summary.tex ./examples/text/geophysics_report/main.tex summaryenv
 ```
 
 It will create the file `summary.tex` containing all the snippets from the `geophysics_report` that are inside a `summaryenv` environment.

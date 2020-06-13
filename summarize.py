@@ -3,44 +3,58 @@ import re
 import argparse
 
 
-def check_start_chapter(line: str):
-    """If line is a chapter declaration return chapter name, else None."""
-    pattern = r"chapter\{(.+)\}"
-    match = re.search(pattern, line)
-    if (match):
-        return match.groups()[0]
-    else:
-        return None
+class LatexParser:
 
+    def __init__(self, envs_to_track: list):
+        self.envs_to_track = envs_to_track
 
-def check_start_section(line: str):
-    """If line is a section declaration return section name, else None."""
-    pattern = r"section\{(.+)\}"
-    match = re.search(pattern, line)
-    if (match):
-        return match.groups()[0]
-    else:
-        return None
+    def check_start_chapter(self, line: str):
+        """If line is a chapter declaration return chapter name, else None."""
+        pattern = r"chapter\{(.+)\}"
+        match = re.search(pattern, line)
+        if (match):
+            return match.groups()[0]
+        else:
+            return None
 
+    def check_start_section(self, line: str):
+        """If line is a section declaration return section name, else None."""
+        pattern = r"section\{(.+)\}"
+        match = re.search(pattern, line)
+        if (match):
+            return match.groups()[0]
+        else:
+            return None
 
-def check_begin_env(line: str, env_to_replicate: list):
-    """If line is an environment declaration of interest return env name, else None."""
-    pattern = r"begin\{(" + "|".join(env_to_replicate) + r")\}"
-    foundBegin = re.search(pattern, line)
-    if (foundBegin):
-        environment = foundBegin.groups()[0]
-        return environment
-    else:
-        return None
+    def check_begin_env(self, line: str):
+        """If line is an environment declaration of interest return env name, else None."""
+        pattern = r"begin\{(" + "|".join(self.envs_to_track) + r")\}"
+        foundBegin = re.search(pattern, line)
+        if (foundBegin):
+            environment = foundBegin.groups()[0]
+            return environment
+        else:
+            return None
 
+    def check_end_env(self, line: str, current_environment: str) -> bool:
+        """Return if line declares the end of the specified environment."""
+        pattern = r"end\{(" + current_environment + r")\}"
+        if (re.search(pattern, line)):
+            return True
+        else:
+            return False
 
-def check_end_env(line: str, current_environment: str) -> bool:
-    """Return if line declares the end of the specified environment."""
-    pattern = r"end\{(" + current_environment + r")\}"
-    if (re.search(pattern, line)):
-        return True
-    else:
-        return False
+    def check_file_include(self, line: str):
+        """If line is an include/input return the filepath, else None"""
+        pattern = r"(input|include)\{(.+)\}"
+        match = re.search(pattern, line)
+        if (match):
+            file_rel_path = match.groups()[1]
+            if (not file_rel_path.endswith(".tex")):
+                file_rel_path += ".tex"
+            return file_rel_path
+        else:
+            return None
 
 
 def print_env(out_file, current_chapter, current_section, line: str):
@@ -54,22 +68,34 @@ def print_env(out_file, current_chapter, current_section, line: str):
     out_file.write(line)
 
 
-def find_and_copy_envs(out_file, lines: list, envs_to_copy: list):
+def find_and_copy_envs(out_file, tex_path: str, p: LatexParser):
     """Analyze the text line by line and copy the desired envs in the out file."""
 
     current_chapter = None
     current_section = None
     current_environment = None
     nesting_level = 0
+    tex_main_dir = os.path.dirname(tex_path)
+
+    with open(tex_path) as input_file:
+        out_file.write("")
+        lines = input_file.readlines()
 
     for line in lines:
+
+        found_include = p.check_file_include(line)
+        if (found_include):
+            # Enter the new file recursively, when finished move to the next line
+            included_path = os.path.join(tex_main_dir, found_include)
+            find_and_copy_envs(out_file, included_path, p)
+            continue
 
         if (current_environment is None):
             # If we are not in one of the specified environments.
 
-            found_environment = check_begin_env(line, envs_to_copy)
-            found_chapter = check_start_chapter(line)
-            found_section = check_start_section(line)
+            found_environment = p.check_begin_env(line)
+            found_chapter = p.check_start_chapter(line)
+            found_section = p.check_start_section(line)
 
             if (found_environment):
                 # Line matches the pattern 'begin{ENV}' is found, with ENV being one of the
@@ -88,12 +114,13 @@ def find_and_copy_envs(out_file, lines: list, envs_to_copy: list):
         else:
             # If we are already inside one of the specified environments.
 
-            found_environment = check_begin_env(line, envs_to_copy)
+            out_file.write(line)
+
+            found_environment = p.check_begin_env(line)
             if (found_environment == current_environment):
                 nesting_level += 1
-
-            out_file.write(line)
-            if (check_end_env(line, current_environment)):
+            
+            if (p.check_end_env(line, current_environment)):
                 # Line matches the pattern "end{ENV}" where ENV is the current environment.
                 if (nesting_level > 0):
                     nesting_level -= 1
@@ -102,21 +129,11 @@ def find_and_copy_envs(out_file, lines: list, envs_to_copy: list):
                     out_file.write("\n")
 
 
-def main(tex_files_dir: str, out_path: str, envs_to_copy: list):
+def main(tex_main: str, out_path: str, envs_to_copy: list):
 
-    tex_files = []
-    for filename in os.listdir(tex_files_dir):
-        full_path = os.path.join(tex_files_dir, filename)
-        if (filename.endswith(".tex") and full_path != out_path):
-            tex_files.append(full_path)
-
+    p = LatexParser(envs_to_copy)
     with open(out_path, "w") as out_file:
-
-        out_file.write("")
-        for tex_file in tex_files:
-            with open(tex_file) as f:
-                lines = f.readlines()
-            find_and_copy_envs(out_file, lines, envs_to_copy)
+        find_and_copy_envs(out_file, tex_main, p)
 
 
 if __name__ == "__main__":
@@ -124,8 +141,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Generate a LaTeX file copying only specified envs from a source project.")
 
-    parser.add_argument("-d", dest="tex_dir", type=str, default="./",
-                        help="directory containing the .tex files (default './')")
+    parser.add_argument("tex_main", metavar="TEX_MAIN", type=str,
+                        help="main .tex file containing document begin-end")
     parser.add_argument("-o", dest="out_file", type=str, default="./summarized.tex",
                         help="where to save the generated tex code (default './summary.tex')")
     parser.add_argument("envs", metavar="ENV", nargs="+", type=str,
@@ -133,4 +150,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    main(args.tex_dir, args.out_file, args.envs)
+    main(args.tex_main, args.out_file, args.envs)
