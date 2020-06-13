@@ -1,0 +1,14 @@
+
+*.aux
+
+*.atfi
+
+*.bbl
+
+*.log
+
+*.out
+
+*.blg
+
+*.gz

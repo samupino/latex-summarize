@@ -1,0 +1,36 @@
+\append{Appendix example}
+\label{example}
+
+According to the new SEG standard, appendices come before references.
+
+\begin{equation}
+\frac{\partial U}{\partial z} = 
+\left\{
+  \sqrt{\frac{1}{v^2} - \left[\frac{\partial t}{\partial g}\right]^2} +
+  \sqrt{\frac{1}{v^2} - \left[\frac{\partial t}{\partial s}\right]^2}
+\right\}
+\frac{\partial U}{\partial t}
+\label{eqn:partial}
+\end{equation}
+It is important to get equation~\ref{eqn:partial} right. See also
+Appendix~\ref{equations}.
+
+\append[equations]{Another appendix}
+
+\begin{equation}
+\frac{\partial U}{\partial z} = 
+\left\{
+  \sqrt{\frac{1}{v^2} - \left[\frac{\partial t}{\partial g}\right]^2} +
+  \sqrt{\frac{1}{v^2} - \left[\frac{\partial t}{\partial s}\right]^2}
+\right\}
+\frac{\partial U}{\partial t}
+\label{eqn:partial2}
+\end{equation}
+Too lazy to type a different equation but note the numeration.
+
+The error comparison is provided in Figure~\ref{fig:errgrp}.
+
+\sideplot{errgrp}{width=0.8\textwidth}
+{This figure is specified in the document by \texttt{
+    $\backslash$sideplot\{errgrp\}\{width=0.8$\backslash$text\-width\}\{This caption.\}}.
+}

@@ -1,0 +1,49 @@
+\documentclass{georeport}
+
+% An example of defining macros
+\newcommand{\rs}[1]{\mathstrut\mbox{\scriptsize\rm #1}}
+\newcommand{\rr}[1]{\mbox{\rm #1}}
+
+\newenvironment{summaryenv}{}{}
+
+\begin{document}
+
+\title{An example \emph{Geophysics} report, \\ with a two-line title}
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}} 
+
+\ms{GEO-Example} % manuscript number
+
+\address{
+\footnotemark[1]BP UTG, \\
+200 Westlake Park Blvd, \\
+Houston, TX, 77079 \\
+\footnotemark[2]Bureau of Economic Geology, \\
+John A. and Katherine G. Jackson School of Geosciences \\
+The University of Texas at Austin \\
+University Station, Box X \\
+Austin, TX 78713-8924}
+\author{Joe Dellinger\footnotemark[1] and Sergey Fomel\footnotemark[2]}
+
+\footer{Example}
+\lefthead{Dellinger \& Fomel}
+\righthead{\emph{Geophysics} example}
+
+\maketitle
+
+\begin{abstract}
+  This is an example of using \textsf{georeport.cls} for writing
+  \emph{Geophysics} reports.
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/theory.tex}
+\input{sections/acknowledgements}
+\include{sections/appendix}
+
+\newpage
+
+\bibliographystyle{seg}  % style file is seg.bst
+\bibliography{example}
+
+\end{document}
