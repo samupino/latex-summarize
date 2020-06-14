@@ -10,7 +10,7 @@ class LatexParser:
 
     def check_start_chapter(self, line: str):
         """If line is a chapter declaration return chapter name, else None."""
-        pattern = r"chapter\{(.+)\}"
+        pattern = r"\\chapter\{(.+)\}"
         match = re.search(pattern, line)
         if (match):
             return match.groups()[0]
@@ -19,7 +19,7 @@ class LatexParser:
 
     def check_start_section(self, line: str):
         """If line is a section declaration return section name, else None."""
-        pattern = r"section\{(.+)\}"
+        pattern = r"\\section\{(.+)\}"
         match = re.search(pattern, line)
         if (match):
             return match.groups()[0]
@@ -28,7 +28,7 @@ class LatexParser:
     
     def check_start_appendix(self, line: str):
         """If line is an appendix declaration return 'Appendix: NAME', else None."""
-        pattern = r"append(\[.*\])?\{(.+)\}"
+        pattern = r"\\append(\[.*\])?\{(.+)\}"
         match = re.search(pattern, line)
         if (match):
             return "Appendix: " + match.groups()[-1]
@@ -37,7 +37,7 @@ class LatexParser:
 
     def check_begin_env(self, line: str):
         """If line is an environment declaration of interest return env name, else None."""
-        pattern = r"begin\{(" + "|".join(self.envs_to_track) + r")\}"
+        pattern = r"\\begin\{(" + "|".join(self.envs_to_track) + r")\}"
         foundBegin = re.search(pattern, line)
         if (foundBegin):
             environment = foundBegin.groups()[0]
@@ -47,7 +47,7 @@ class LatexParser:
 
     def check_end_env(self, line: str, current_environment: str) -> bool:
         """Return if line declares the end of the specified environment."""
-        pattern = r"end\{(" + current_environment + r")\}"
+        pattern = r"\\end\{(" + current_environment + r")\}"
         if (re.search(pattern, line)):
             return True
         else:
@@ -55,7 +55,7 @@ class LatexParser:
 
     def check_file_include(self, line: str):
         """If line is an include/input return the filepath, else None"""
-        pattern = r"(input|include)\{(.+)\}"
+        pattern = r"\\(input|include)\{(.+)\}"
         match = re.search(pattern, line)
         if (match):
             file_rel_path = match.groups()[1]
